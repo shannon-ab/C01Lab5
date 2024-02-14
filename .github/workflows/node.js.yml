@@ -5,43 +5,40 @@ name: Node.js CI
 
 on:
   push:
-    branches: ["main"]
-  pull_request:
-    branches: ["main", "dev"]
+      branches: ["main"]
+  pull_request: 
+        branches: ["main", "dev"]
 
 jobs:
-  build:
-    name: Backend test
-    runs-on: ubuntu-latest
+    build:
+        name: Backend test
+        runs-on: ubuntu-latest
 
-    services:
-      mongodb:
-        image: mongo:latest
-        ports:
-          - 27017:27017
+      services:
+        mongodb:
+          image: mongo:latest
+          ports:
+            - 27017:27017
 
-    defaults:
-      run:
-        working-directory: ./quirknotes/backend
+        defaults:
+            run:
+                working-directory: ./quirknotes/backend
 
-    strategy:
-      matrix:
-        node-version: [20.x]
+        strategy:
+            matrix:
+                node-version: [20.x]
 
-    steps:
-      - uses: actions/checkout@v3
+        steps:
+            - uses: actions/checkout@v3
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v3
+              with:
+                node-version: ${{ matrix.node-version }}
+            - run: npm install
+            - run: mongo --host mongodb --eval 'db.runCommand({ connectionStatus: 1 })'
+            - run: npm run dev &
+              env:
+                MONGODB_URI: mongodb://localhost:27017/quirknotes
 
-      - run: npm install
-
-      - run: mongo --host mongodb --eval 'db.runCommand({ connectionStatus: 1 })'
-
-      - run: npm run dev &
-        env:
-          MONGODB_URI: mongodb://localhost:27017/quirknotes
-
-      - run: npm test
+            - run: npm test
